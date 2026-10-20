@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://coolguy-md-v10-pair.onrender.com/sitemap.xml
