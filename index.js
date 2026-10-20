@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 // ========= GHOST MD ULTRA UI - COOLGUY EDITION =========
 const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html><head><meta name="google-site-verification" content="fOUBkJSZSHMLHJ53HA3tIe79xr6GsYnMYNnlBZ5djKo" /><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>COOLGUY-MD V10 - Ultra Pair</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -64,6 +64,7 @@ async function getCode(){
 </body></html>`;
 
 app.get('/', (req,res)=> res.send(html));
+app.get('/google9aff0c4a62c2c2e1.html', (req,res)=> res.send('google-site-verification: google9aff0c4a62c2c2e1.html'));
 
 app.get('/pair', async (req,res)=>{
   let number = req.query.number?.replace(/[^0-9]/g,'');
