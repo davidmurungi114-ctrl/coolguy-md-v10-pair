@@ -1,9 +1,16 @@
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 const pino = require('pino');
 const { default: makeWASocket, useMultiFileAuthState, makeCacheableSignalKeyStore, delay } = require('@whiskeysockets/baileys');
 
 const app = express();
+app.get('/sitemap.xml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'sitemap.xml'));
+});
+app.get('/robots.txt', (req, res) => {
+  res.sendFile(path.join(__dirname, 'robots.txt'));
+});
 const PORT = process.env.PORT || 3000;
 
 // ========= GHOST MD ULTRA UI - COOLGUY EDITION =========
