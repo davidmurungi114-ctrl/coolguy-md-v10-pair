@@ -38,28 +38,30 @@ app.get('/google9aff0c4a62c2c2e1.html', (req,res)=> res.send('google-site-verifi
 app.get('/pair', async (req,res)=>{
   let number = req.query.number?.replace(/[^0-9]/g,'');
   if(!number) return res.json({error:'Enter valid number'});
-  const dir = './temp-'+number;
+  const dir = './temp-'+number+'-'+Date.now();
   try{
     if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true});
     const { state, saveCreds } = await useMultiFileAuthState(dir);
     const sock = makeWASocket({
       logger: pino({level:'silent'}),
       printQRInTerminal:false,
-      browser: ["COOLGUY-MD.V10","Chrome","20.0"],
-      auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level:'silent'}).child({level:'silent'})) }
+      browser: ["Ubuntu","Chrome","20.0.04"],
+      auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level:'silent'})) }
     });
     sock.ev.on('creds.update', saveCreds);
-    await delay(2500);
+    await delay(3500);
     if(!sock.authState.creds.registered){
+      await delay(1500);
       let code = await sock.requestPairingCode(number);
       code = code?.match(/.{1,4}/g)?.join('-') || code;
       res.json({code});
-    } else { res.json({error:'Number already registered'}); }
-    setTimeout(()=>{ try{ fs.rmSync(dir,{recursive:true,force:true}); }catch{} try{ sock.end(); }catch{} }, 40000);
+      console.log('CODE FOR '+number+': '+code);
+    } else { res.json({error:'Number already registered, delete linked devices'}); }
+    setTimeout(()=>{ try{ fs.rmSync(dir,{recursive:true,force:true}); }catch{} try{ sock.end(); }catch{} }, 60000);
   }catch(e){
-    console.log(e);
+    console.log('PAIR ERROR:', e);
     try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{}
-    res.json({error:e.message});
+    res.json({error: 'WhatsApp blocked, try again: '+e.message});
   }
 });
 app.listen(PORT, ()=> console.log('COOLGUY GHOST ULTRA PAIR running on '+PORT));
