@@ -5,7 +5,7 @@ const { default: makeWASocket, useMultiFileAuthState, makeCacheableSignalKeyStor
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>COOLGUY MD V12</title><style>
+const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>COOLGUY MD V10 Pair Code - Official Pair Generator | COOLGUY TECH</title><meta name="description" content="COOLGUY MD V10 Official Pair Site - Get WhatsApp Pair Code instantly. Fast, Secure, Free. By COOLGUY TECH Uganda - Kampala."><meta name="keywords" content="coolguy md v10 pair code, coolguy md v10 pair site, coolguy tech pair, whatsapp bot pair code, coolguy md bot"><meta name="author" content="COOLGUY TECH"><meta name="robots" content="index, follow"><meta property="og:title" content="COOLGUY MD V10 - Official Pair Code Generator"><meta property="og:description" content="Generate COOLGUY MD V10 WhatsApp Pair Code in 10 seconds - V20 GOOGLE SEO Active"><meta property="og:url" content="https://coolguy-md-v10-pair.onrender.com"><meta property="og:type" content="website"><style>
 *{margin:0;padding:0;box-sizing:border-box}body{background:#0a0e16;color:#fff;font-family:sans-serif;padding:16px;min-height:100vh}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.top button{background:#151c28;border:1px solid #1e2d42;color:#fff;padding:10px 16px;border-radius:20px;font-weight:600}
 .card{background:#151c28;border:1px solid #1e2d42;border-radius:22px;padding:18px;margin-bottom:14px}.profile{display:flex;gap:14px;align-items:center}.profile img{width:56px;height:56px;border-radius:50%;border:2px solid #00ff88;object-fit:cover}
@@ -20,9 +20,9 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewp
 .footer{margin-top:24px;text-align:center;color:#3a455c;font-size:10px;letter-spacing:1px}
 </style></head><body>
 <div class="top"><button>🌐 EN</button><div style="display:flex;gap:8px"><button>🎨 Theme</button><button>☰</button></div></div>
-<div class="card"><div class="profile"><img src="https://i.imgur.com/8Km9tLL.jpg"><div><div class="title"><span>C</span>OOLGUY MD</div><div class="sub">Ultra Pairing System V12 - PROFESSOR COOLGUY - GHOST FINAL</div></div></div></div>
-<div class="card node"><b>🛡️ System Mainframe Node - V19 COPY FIX</b><div>TAP CODE TO COPY - 10 MIN!</div></div>
-<div class="card vip"><span>VIP</span><b>V19 COPY ACTIVE!</b><div>Tap code to auto copy</div></div>
+<div class="card"><div class="profile"><img src="https://i.imgur.com/8Km9tLL.jpg"><div><div class="title"><span>C</span>OOLGUY MD V10 - OFFICIAL PAIR SITE</div><div class="sub">Ultra Pairing System V20 - PROFESSOR COOLGUY - GOOGLE SEO</div></div></div></div>
+<div class="card node"><b>🛡️ System Mainframe Node - V20 GOOGLE SEO</b><div>SEO + TAP TO COPY - Indexed!</div></div>
+<div class="card vip"><span>VIP</span><b>V20 GOOGLE ACTIVE!</b><div>Now on Google Search!</div></div>
 <div class="label">WhatsApp Number</div>
 <div class="input">📞 <input id="num" placeholder="256781539746"></div>
 <div style="color:#5a657e;font-size:12px;margin-top:6px">Enter with country code, no + or spaces</div>
@@ -30,7 +30,7 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewp
 <div class="code" id="result" onclick="copyCode()">Code will appear here - Tap to copy</div>
 <div class="copyHint">👆 Tap the code to copy</div>
 <div class="copyMsg" id="copyMsg">✅ Copied! Now paste in WhatsApp > Linked Devices > Link with phone number</div>
-<div class="footer">COOLGUY TECH - Kampala Uganda - V19</div>
+<div class="footer">COOLGUY TECH - Kampala Uganda - V20 GOOGLE SEO - Official Pair Site</div>
 <script>
 function copyCode(){
   const el = document.getElementById('result');
@@ -65,7 +65,7 @@ app.get('/pair',async(req,res)=>{
     const v = await fetchLatestBaileysVersion();
     version = v.version;
   } catch { version = [2,3000,1023223821]; }
-  console.log('V19 VERSION:',version,'NODE:',process.version);
+  console.log('V20 VERSION:',version,'NODE:',process.version);
   const sock = makeWASocket({ 
    version, 
    logger: pino({level:'silent'}), 
@@ -74,21 +74,18 @@ app.get('/pair',async(req,res)=>{
    auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level:'silent'})) }
   });
   sock.ev.on('creds.update', saveCreds);
-  sock.ev.on('connection.update', (u)=> {
-   console.log('CONN UPDATE:',u.connection,'error:',u.lastDisconnect?.error?.message);
-  });
   await delay(6000);
   if(!sock.authState.creds.registered){
    let code = await sock.requestPairingCode(number);
    code = code?.match(/.{1,4}/g)?.join('-')||code;
    if(!res.headersSent) res.json({code});
-   console.log('✅ V19 CODE OK:',code);
+   console.log('✅ V20 CODE OK:',code);
    setTimeout(()=>{ try{ sock.end(); }catch{} try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{} }, 600000);
   }
  }catch(e){ 
-  console.error('V19 CRITICAL ERROR:',e);
+  console.error('V20 ERROR:',e);
   try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{}
-  if(!res.headersSent) res.json({error:e.message + ' | Node:'+process.version}); 
+  if(!res.headersSent) res.json({error:e.message}); 
  }
 });
-app.listen(PORT,()=>console.log('V19 RUNNING NODE',process.version));
+app.listen(PORT,()=>console.log('V20 GOOGLE SEO RUNNING'));
