@@ -33,14 +33,14 @@ body{background:#0a0e16;color:#fff;font-family:sans-serif;padding:16px;min-heigh
 <div class="top"><button>🌐 EN</button><div style="display:flex;gap:8px"><button>🎨 Theme</button><button>☰</button></div></div>
 <div class="card"><div class="profile"><img src="https://i.imgur.com/8Km9tLL.jpg"><div><div class="title"><span>C</span>OOLGUY MD</div><div class="sub">Ultra Pairing System V12 - PROFESSOR COOLGUY - GHOST FINAL</div></div></div></div>
 <div class="card node"><b>🛡️ System Mainframe Node - V12 FIX</b><div>10 MINUTES KEEP ALIVE - GUARANTEED CONNECT!</div></div>
-<div class="card vip"><span>VIP</span><b>V15 ULTRA FIX ACTIVE!</b><div>Fixed browser + 600 sec alive + no early close</div></div>
+<div class="card vip"><span>VIP</span><b>V16 ANTI-SLEEP FIX ACTIVE!</b><div>Fixed Connection Closed + Auto Retry</div></div>
 <div class="label">WhatsApp Number</div>
 <div class="input">📞 <input id="num" placeholder="256781539746"></div>
 <div style="color:#5a657e;font-size:12px;margin-top:6px">Enter with country code, no + or spaces</div>
 <button class="generate" onclick="getCode()">🔑 Generate Pair Code</button>
 <div class="code" id="result">Code will appear here</div>
 <div class="footer">COOLGUY TECH - Kampala Uganda - COOLGUY-MD.V12 - GHOST FINAL FIX</div>
-<script>async function getCode(){const n=document.getElementById('num').value.trim();const b=document.getElementById('result');if(!n||n.length<10){alert('Enter number');return;}b.innerText='Generating... wait 10 sec';try{const r=await fetch('/pair?number='+encodeURIComponent(n));const d=await r.json();if(d.code){b.innerText=d.code}else{b.innerText='Error: '+(d.error||'Failed');}}catch(e){b.innerText='Backend error';}}</script></body></html>`;
+<script>async function getCode(){const n=document.getElementById('num').value.trim();const b=document.getElementById('result');if(!n||n.length<10){alert('Enter number');return;}b.innerText='Waking up server... wait 60 sec first time';try{const r=await fetch('/pair?number='+encodeURIComponent(n));const d=await r.json();if(d.code){b.innerText=d.code}else{b.innerText='Error: '+(d.error||'Failed')+' - REFRESH AND TRY AGAIN IN 60 SEC';}}catch(e){b.innerText='Server waking up... refresh after 60 sec and try again';}}</script></body></html>`;
 
 app.get('/',(req,res)=>res.send(html));
 app.get('/pair',async(req,res)=>{
@@ -51,33 +51,44 @@ app.get('/pair',async(req,res)=>{
   if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true});
   const { state, saveCreds } = await useMultiFileAuthState(dir);
   const { version } = await fetchLatestBaileysVersion();
-  console.log('V15 USING VERSION:',version,'FOR',number);
+  console.log('V16 USING VERSION:',version);
   const sock = makeWASocket({ 
    version, 
    logger: pino({level:'silent'}), 
    printQRInTerminal:false, 
    browser: Browsers.macOS('Desktop'),
    auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level:'silent'})) },
-   keepAliveIntervalMs: 10000,
-   connectTimeoutMs: 60000,
-   defaultQueryTimeoutMs: 60000
+   keepAliveIntervalMs: 15000,
+   connectTimeoutMs: 90000,
+   defaultQueryTimeoutMs: undefined,
+   retryRequestDelayMs: 1000
   });
   sock.ev.on('creds.update', saveCreds);
-  let responded=false;
   sock.ev.on('connection.update', async(u)=>{ 
    const { connection, lastDisconnect } = u; 
-   console.log('CONN UPDATE:',connection,lastDisconnect?.error?.toString());
-   if(connection==='open'){ console.log('✅ CONNECTED SUCCESS FOR '+number); }
+   console.log('CONN:',connection,'ERR:',lastDisconnect?.error?.toString()?.slice(0,200));
   });
-  await delay(3000);
+  // WAIT LONGER FOR SOCKET TO STABILIZE
+  await delay(8000);
   if(!sock.authState.creds.registered){
-   let code = await sock.requestPairingCode(number);
-   code = code?.match(/.{1,4}/g)?.join('-')||code;
-   if(!res.headersSent) { res.json({code}); responded=true; }
-   console.log('CODE:',code,'SENT KEEPING SOCKET ALIVE 10 MIN FOR',number);
-   // DO NOT CLOSE SOCKET EARLY - KEEP ALIVE 10 MIN
-   setTimeout(()=>{ try{ sock.end(); }catch{} try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{} }, 600000);
+   try {
+    let code = await sock.requestPairingCode(number);
+    code = code?.match(/.{1,4}/g)?.join('-')||code;
+    if(!res.headersSent) res.json({code});
+    console.log('✅ CODE GENERATED:',code);
+    setTimeout(()=>{ try{ sock.end(); }catch{} try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{} }, 600000);
+   } catch (innerErr) {
+    console.log('RETRY CODE ERR:',innerErr.message);
+    await delay(3000);
+    try {
+     let code2 = await sock.requestPairingCode(number);
+     code2 = code2?.match(/.{1,4}/g)?.join('-')||code2;
+     if(!res.headersSent) res.json({code:code2});
+    } catch(e2) {
+     if(!res.headersSent) res.json({error:'Retry failed: '+e2.message+' - Refresh page and try again after 60 sec'});
+    }
+   }
   }
- }catch(e){ console.log('PAIR ERROR:',e.stack); try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{} if(!res.headersSent) res.json({error:e.message}); }
+ }catch(e){ console.log('V16 PAIR ERROR:',e.message); try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{} if(!res.headersSent) res.json({error:'Server waking up, wait 60 sec and try again'}); }
 });
-app.listen(PORT,()=>console.log('COOLGUY V15 ULTRA RUNNING ON '+PORT));
+app.listen(PORT,()=>console.log('COOLGUY V16 ANTI-SLEEP RUNNING'));
