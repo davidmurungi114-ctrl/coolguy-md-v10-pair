@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const pino = require('pino');
-const { default: makeWASocket, useMultiFileAuthState, makeCacheableSignalKeyStore, delay, Browsers } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, makeCacheableSignalKeyStore, delay, Browsers, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -14,20 +14,20 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewp
 .vip{background:#1a160e;border:1px solid #3d3414}.vip span{background:#ffcc00;color:#000;padding:4px 12px;border-radius:12px;font-size:11px;font-weight:900}.vip b{display:block;margin-top:10px;color:#ffcc00}.vip div{color:#8b98b0;font-size:11px;margin-top:4px}
 .label{margin:18px 0 8px 4px;font-weight:600}.input{background:#101722;border:1px solid #1e2d42;border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center}.input input{background:transparent;border:none;outline:none;color:#fff;width:100%;font-size:16px}
 .generate{width:100%;margin-top:16px;background:#00ff88;border:none;padding:15px;border-radius:14px;font-weight:900;font-size:15px;cursor:pointer;color:#000}
-.code{margin-top:14px;border:1px dashed #00ff88;background:#0a1210;border-radius:14px;padding:18px;text-align:center;color:#00ff88;font-weight:800;min-height:56px;display:flex;justify-content:center;align-items:center;word-break:break-all;font-size:22px;letter-spacing:2px}
+.code{margin-top:14px;border:1px dashed #00ff88;background:#0a1210;border-radius:14px;padding:18px;text-align:center;color:#00ff88;font-weight:800;min-height:56px;display:flex;justify-content:center;align-items:center;word-break:break-all;font-size:18px;letter-spacing:1px}
 .footer{margin-top:24px;text-align:center;color:#3a455c;font-size:10px;letter-spacing:1px}
 </style></head><body>
 <div class="top"><button>🌐 EN</button><div style="display:flex;gap:8px"><button>🎨 Theme</button><button>☰</button></div></div>
 <div class="card"><div class="profile"><img src="https://i.imgur.com/8Km9tLL.jpg"><div><div class="title"><span>C</span>OOLGUY MD</div><div class="sub">Ultra Pairing System V12 - PROFESSOR COOLGUY - GHOST FINAL</div></div></div></div>
-<div class="card node"><b>🛡️ System Mainframe Node - V17 FIX</b><div>LATEST WA v2.3000 - 10 MIN ALIVE!</div></div>
-<div class="card vip"><span>VIP</span><b>V17 BAILEYS 6.7.18 ACTIVE!</b><div>Fixed Connection Closed - Latest Lib</div></div>
+<div class="card node"><b>🛡️ System Mainframe Node - V18 FIX</b><div>NODE 20 + LATEST LIB - 10 MIN!</div></div>
+<div class="card vip"><span>VIP</span><b>V18 NODE 20 ACTIVE!</b><div>Fixed Connection Closed - Final</div></div>
 <div class="label">WhatsApp Number</div>
 <div class="input">📞 <input id="num" placeholder="256781539746"></div>
 <div style="color:#5a657e;font-size:12px;margin-top:6px">Enter with country code, no + or spaces</div>
 <button class="generate" onclick="getCode()">🔑 Generate Pair Code</button>
 <div class="code" id="result">Code will appear here</div>
-<div class="footer">COOLGUY TECH - Kampala Uganda - COOLGUY-MD.V12 - V17 ULTIMATE FIX</div>
-<script>async function getCode(){const n=document.getElementById('num').value.trim();const b=document.getElementById('result');if(!n||n.length<10){alert('Enter number');return;}b.innerText='Generating with latest lib... wait 15 sec';try{const r=await fetch('/pair?number='+encodeURIComponent(n));const d=await r.json();if(d.code){b.innerText=d.code}else{b.innerText='Error: '+(d.error||'Failed');}}catch(e){b.innerText='Backend error - refresh and try again';}}</script></body></html>`;
+<div class="footer">COOLGUY TECH - Kampala Uganda - V18</div>
+<script>async function getCode(){const n=document.getElementById('num').value.trim();const b=document.getElementById('result');if(!n||n.length<10){alert('Enter number');return;}b.innerText='Connecting to WhatsApp... wait 20 sec';try{const r=await fetch('/pair?number='+encodeURIComponent(n));const d=await r.json();if(d.code){b.innerText=d.code}else{b.innerText='Error: '+(d.error||'Failed')};}catch(e){b.innerText='Network error - try again in 60 sec';}}</script></body></html>`;
 
 app.get('/',(req,res)=>res.send(html));
 app.get('/pair',async(req,res)=>{
@@ -37,32 +37,35 @@ app.get('/pair',async(req,res)=>{
  try{
   if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true});
   const { state, saveCreds } = await useMultiFileAuthState(dir);
-  // HARDCODED LATEST VERSION - NOT FETCHING FROM API WHICH IS BLOCKED ON RENDER
-  const version = [2, 3000, 1021383224];
-  console.log('V17 HARDCODED VERSION:',version,'FOR',number);
+  let version;
+  try {
+    const v = await fetchLatestBaileysVersion();
+    version = v.version;
+  } catch { version = [2,3000,1023223821]; }
+  console.log('V18 VERSION:',version,'NODE:',process.version);
   const sock = makeWASocket({ 
    version, 
    logger: pino({level:'silent'}), 
    printQRInTerminal:false, 
-   browser: Browsers.macOS('Edge'),
-   auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level:'silent'})) },
-   markOnlineOnConnect: false,
-   syncFullHistory: false
+   browser: Browsers.macOS('Desktop'),
+   auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level:'silent'})) }
   });
   sock.ev.on('creds.update', saveCreds);
-  sock.ev.on('connection.update', (u)=> console.log('CONN:',u.connection));
-  await delay(5000);
+  sock.ev.on('connection.update', (u)=> {
+   console.log('CONN UPDATE:',u.connection,'error:',u.lastDisconnect?.error?.message);
+  });
+  await delay(6000);
   if(!sock.authState.creds.registered){
    let code = await sock.requestPairingCode(number);
    code = code?.match(/.{1,4}/g)?.join('-')||code;
    if(!res.headersSent) res.json({code});
-   console.log('✅ V17 CODE:',code);
+   console.log('✅ V18 CODE OK:',code);
    setTimeout(()=>{ try{ sock.end(); }catch{} try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{} }, 600000);
   }
  }catch(e){ 
-  console.log('V17 ERROR:',e.message); 
+  console.error('V18 CRITICAL ERROR:',e);
   try{ if(fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true}); }catch{}
-  if(!res.headersSent) res.json({error:e.message}); 
+  if(!res.headersSent) res.json({error:e.message + ' | Node:'+process.version}); 
  }
 });
-app.listen(PORT,()=>console.log('COOLGUY V17 ULTIMATE RUNNING ON '+PORT));
+app.listen(PORT,()=>console.log('V18 RUNNING NODE',process.version));
