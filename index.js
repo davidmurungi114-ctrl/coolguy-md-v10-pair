@@ -11,9 +11,9 @@ const COUNT_FILE = path.join(__dirname, 'counts.json');
 const AUTH_BASE = path.join(__dirname, 'live_auth');
 if(!fs.existsSync(AUTH_BASE)) fs.mkdirSync(AUTH_BASE,{recursive:true});
 
-function getCounts(){ try{ if(!fs.existsSync(COUNT_FILE)) return {s1:2,s2:1,s3:5}; return JSON.parse(fs.readFileSync(COUNT_FILE,'utf8')); }catch{return {s1:2,s2:1,s3:5}} }
+function getCounts(){ try{ if(!fs.existsSync(COUNT_FILE)) return {s1:50,s2:0,s3:0}; return JSON.parse(fs.readFileSync(COUNT_FILE,'utf8')); }catch{return {s1:50,s2:0,s3:0}} }
 function saveCounts(c){ try{fs.writeFileSync(COUNT_FILE, JSON.stringify(c));}catch{} }
-function incCount(id){ const c=getCounts(); const key='s'+id; if(c[key]>=50) return {full:true,counts:c}; c[key]=(c[key]||0)+1; saveCounts(c); return {full:false,counts:c}; }
+function incCount(id){ const c=getCounts(); const key='s'+id; if(id===1) return {full:true,counts:c}; if(c[key]>=50) return {full:true,counts:c}; c[key]=(c[key]||0)+1; saveCounts(c); return {full:false,counts:c}; }
 
 async function startLiveBot(authDir){
   try{
@@ -62,8 +62,8 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewp
 <div class="mode-btn active" id="modeLive" onclick="setMode('live')">🤖 LIVE BOT</div>
 <div class="mode-btn" id="modeSession" onclick="setMode('session')">🔑 SESSION ID</div>
 </div>
-<div class="node active" id="n1" onclick="sel(1)"><b>SERVER 01</b><div id="s1">Loading...</div></div>
-<div class="node" id="n2" onclick="sel(2)"><b>SERVER 02</b><div id="s2">Loading...</div></div>
+<div class="node full" id="n1" onclick="sel(1)"><b>SELECT DEPLOYMENT NODE</b><div id="s1">Active: -- Limit: --</div></div>
+<div class="node active" id="n2" onclick="sel(2)"><b>SERVER 02</b><div id="s2">Loading...</div></div>
 <div class="node" id="n3" onclick="sel(3)"><b>SERVER 03</b><div id="s3">Loading...</div></div>
 </div></div>
 <div class="mainframe"><b>V10 FIXED</b><div id="mainMsg">Live: .menu instant</div></div>
@@ -73,15 +73,31 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewp
 <div class="status" id="status"></div>
 <div class="footer">© 2026 COOLGUY MD V10</div>
 <script>
-let selected=1; let counts={s1:0,s2:0,s3:0}; let mode='live';
+let selected=2; let counts={s1:50,s2:0,s3:0}; let mode='live';
 function setMode(m){ mode=m; document.querySelectorAll('.mode-btn').forEach(e=>e.classList.remove('active')); document.getElementById(m==='live'?'modeLive':'modeSession').classList.add('active'); const btn=document.getElementById('genBtn'); if(m==='live'){btn.innerText='🤖 Generate LIVE BOT Pair Code';btn.className='generate live';} else{btn.innerText='🔑 Generate Pair Code + Get SESSION ID';btn.className='generate';} }
 async function loadCounts(){try{const r=await fetch('/counts');counts=await r.json();updateUI();}catch{}}
-function updateUI(){ for(let i=1;i<=3;i++){ const c=counts['s'+i]||0; const el=document.getElementById('s'+i); const node=document.getElementById('n'+i); if(c>=50){el.innerText='❌ FULL 50/50';node.classList.add('full');} else{el.innerText=(i===selected?'✓ SELECTED - ':'')+'ONLINE · '+c+'/50';node.classList.remove('full');} } }
-function sel(n){ const c=counts['s'+n]||0; if(c>=50){return;} selected=n; document.querySelectorAll('.node').forEach(e=>e.classList.remove('active')); document.getElementById('n'+n).classList.add('active'); updateUI(); }
+function updateUI(){ 
+  document.getElementById('s1').innerText='Active: -- Limit: --';
+  document.getElementById('n1').classList.add('full');
+  for(let i=2;i<=3;i++){ 
+    const c=counts['s'+i]||0; 
+    const el=document.getElementById('s'+i); 
+    const node=document.getElementById('n'+i); 
+    if(c>=50){el.innerText='❌ FULL 50/50';node.classList.add('full');} 
+    else{el.innerText=(i===selected?'✓ SELECTED - ':'')+'ONLINE · '+c+'/50';node.classList.remove('full');} 
+  } 
+}
+function sel(n){ 
+  if(n===1){ document.getElementById('status').innerHTML='<span style="color:#ff4444">⚠️ Please Select SERVER 02 or 03 - Deployment Node Required!</span>'; return; }
+  const c=counts['s'+n]||0; if(c>=50){return;} selected=n; 
+  document.querySelectorAll('.node').forEach(e=>{if(e.id!=='n1') e.classList.remove('active')}); 
+  document.getElementById('n'+n).classList.add('active'); updateUI(); 
+}
 function copyCode(){ const el=document.getElementById('result'); let t=el.innerText.trim(); if(t.includes('Your code')||t.length<6) return; const firstLine=t.split('\\n')[0]; navigator.clipboard.writeText(firstLine).then(()=>{document.getElementById('status').innerHTML='<span style="color:#00ff88">✅ Copied!</span>';}); }
 async function getCode(){
   const num=document.getElementById('num').value.trim(); const b=document.getElementById('result'); const st=document.getElementById('status');
   if(!num||num.length<10){alert('Enter number 256...');return;}
+  if(selected===1){st.innerHTML='<span style="color:#ff4444">⚠️ Select SERVER 02 or 03!</span>';return;}
   b.innerHTML='Connecting... wait 20 sec'; st.innerHTML='⏳ Connecting...';
   try{
     const r=await fetch('/pair?number='+encodeURIComponent(num)+'&server='+selected+'&mode='+mode);
@@ -109,6 +125,7 @@ const activeSessions = {};
 app.get('/pair',async(req,res)=>{
   let num=req.query.number; let serv=parseInt(req.query.server)||1; let mode=req.query.mode||'live';
   if(!num) return res.json({error:'Number required'}); num=num.replace(/[^0-9]/g,'');
+  if(serv===1) return res.json({error:'Select Deployment Node - Choose Server 02 or 03', full:true, counts:getCounts()});
   let check=incCount(serv);
   if(check.full){return res.json({error:'Server FULL 50/50', full:true, counts:check.counts});}
   const baseDir = path.join(AUTH_BASE, 'auth_'+num);
@@ -144,4 +161,4 @@ app.get('/getsession', async (req,res)=>{
   }catch(e){ res.json({error:e.message}); }
 });
 
-const PORT=process.env.PORT||3000;app.listen(PORT,()=>console.log('V10 LIVE HYBRID FIXED ONLINE'));
+const PORT=process.env.PORT||3000;app.listen(PORT,()=>console.log('V10 LIVE - PROFILE KEPT - GHOST STYLE'));
