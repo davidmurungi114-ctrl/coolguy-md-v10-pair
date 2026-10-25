@@ -6,7 +6,7 @@ const path = require('path');
 const pino = require('pino');
 app.use(express.json());
 
-const PIC = 'https://raw.githubusercontent.com/davidmurungi114-ctrl/COOLGUY-MD.V10/refs/heads/main/assets/IMG-20261019-WA8138.jpg';
+const PIC = 'https://files.catbox.moe/wr2ush.jpg';
 const COUNT_FILE = path.join(__dirname, 'counts.json');
 const AUTH_BASE = path.join(__dirname, 'live_auth');
 if(!fs.existsSync(AUTH_BASE)) fs.mkdirSync(AUTH_BASE,{recursive:true});
@@ -56,7 +56,7 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewp
 .generate.live{background:#ffcc00}.code-box{margin-top:14px;border:2px dashed #00ff88;background:#0a1210;border-radius:14px;padding:20px;text-align:center;color:#00ff88;font-weight:800;font-size:16px;min-height:60px;display:flex;justify-content:center;align-items:center;word-break:break-all;cursor:pointer;flex-direction:column}
 .status{text-align:center;margin-top:10px;font-size:13px;font-weight:700}.footer{text-align:center;color:#3a455c;font-size:11px;margin:30px 0 10px}
 </style></head><body>
-<div class="card"><img class="banner" src="${PIC}"><div class="profile-box"><img src="${PIC}"><div><div class="title"><span>P</span>ROFESSOR COOLGUY MD V10</div><div style="color:#8b98b0;font-size:13px">V29.1 LIVE - Arsenal Edition</div></div></div>
+<div class="card"><img class="banner" src="${PIC}"><div class="profile-box"><img src="${PIC}"><div><div class="title"><span>P</span>ROFESSOR COOLGUY MD V10</div><div style="color:#8b98b0;font-size:13px">V10 LIVE - Arsenal Edition</div></div></div>
 <div class="nodes">
 <div class="mode-select">
 <div class="mode-btn active" id="modeLive" onclick="setMode('live')">🤖 LIVE BOT</div>
@@ -66,7 +66,7 @@ const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewp
 <div class="node" id="n2" onclick="sel(2)"><b>SERVER 02</b><div id="s2">Loading...</div></div>
 <div class="node" id="n3" onclick="sel(3)"><b>SERVER 03</b><div id="s3">Loading...</div></div>
 </div></div>
-<div class="mainframe"><b>V29.1 FIXED</b><div id="mainMsg">Live: .menu instant</div></div>
+<div class="mainframe"><b>V10 FIXED</b><div id="mainMsg">Live: .menu instant</div></div>
 <div class="label">WhatsApp Number</div><div class="input-wrap">📞 <input id="num" placeholder="256781539746"></div>
 <button class="generate live" id="genBtn" onclick="getCode()">🤖 Generate LIVE BOT Pair Code</button>
 <div class="code-box" id="result" onclick="copyCode()">Your code / session will appear here</div>
@@ -144,4 +144,4 @@ app.get('/getsession', async (req,res)=>{
   }catch(e){ res.json({error:e.message}); }
 });
 
-const PORT=process.env.PORT||3000;app.listen(PORT,()=>console.log('V29.1 LIVE HYBRID FIXED ONLINE'));
+const PORT=process.env.PORT||3000;app.listen(PORT,()=>console.log('V10 LIVE HYBRID FIXED ONLINE'));
